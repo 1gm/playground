@@ -71,15 +71,16 @@ func (s *server) handleShare(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snip := &snippet{Body: body.Bytes()}
-	id := snip.ID()
-	if err := s.db.PutSnippet(r.Context(), id, snip); err != nil {
-		s.log.Errorf("putting Snippet: %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+	resp, err := http.DefaultClient.Post("https://play.golang.org/share", "text/plain", bytes.NewReader(body.Bytes()))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	fmt.Fprint(w, id)
+	body.Reset()
+	_, err = io.Copy(&body, resp.Body)
+	resp.Body.Close()
+
+	fmt.Fprint(w, body.String())
 }
 
 func allowShare(r *http.Request) bool {
