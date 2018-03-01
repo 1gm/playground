@@ -15,17 +15,15 @@ docker build -t playground .
 ## Running
 
 ```
-docker run --rm -d -p 8080:8080 playground
+# run the image
+docker run --rm -d -p 8080:8080 --name playground-container playground
 # run go some code
 cat /path/to/code.go | go run client.go | curl --data @- localhost:8080/compile
 ```
 
-# Deployment
+## Mount local GOPATH/src
 
-```
-gcloud --project=golang-org --account=person@example.com app deploy app.yaml
-```
-
-# Contributing
-
-To submit changes to this repository, see http://golang.org/doc/contribute.html.
+```bash
+# Replace //d/projects/go/src with your own $GOPATH/src
+docker run -v //d/projects/go/src:/go/src --rm -d -p 8080:8080 --name playground-container playground
+``` 
